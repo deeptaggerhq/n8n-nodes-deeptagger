@@ -1,19 +1,24 @@
 {
   "name": "n8n-nodes-deeptagger",
-  "version": "0.1.0",
-  "description": "",
+  "version": "0.1.4",
+  "description": "Extract structured data from documents using DeepTagger's AI-powered document intelligence API",
   "keywords": [
-    "n8n-community-node-package"
+    "n8n-community-node-package",
+    "deeptagger",
+    "document-extraction",
+    "ocr",
+    "data-extraction",
+    "document-ai"
   ],
   "license": "MIT",
-  "homepage": "",
+  "homepage": "https://deeptagger.com",
   "author": {
-    "name": "",
-    "email": ""
+    "name": "DeepTagger",
+    "email": "support@deeptagger.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/<...>/n8n-nodes-<...>.git"
+    "url": "https://github.com/deeptaggerhq/n8n-nodes-deeptagger.git"
   },
   "engines": {
     "node": ">=20.15"
@@ -33,13 +38,9 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
-      "dist/credentials/ExampleCredentialsApi.credentials.js",
-      "dist/credentials/HttpBinApi.credentials.js",
       "dist/credentials/DeepTaggerApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/ExampleNode/ExampleNode.node.js",
-      "dist/nodes/HttpBin/HttpBin.node.js",
       "dist/nodes/DeepTagger/DeepTagger.node.js"
     ]
   },

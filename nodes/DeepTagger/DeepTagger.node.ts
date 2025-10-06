@@ -6,6 +6,9 @@ import {
 	NodeOperationError,
 } from 'n8n-workflow';
 
+// Use global Buffer (no import needed - available in Node.js runtime)
+declare const Buffer: typeof import('buffer').Buffer;
+
 export class DeepTagger implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'DeepTagger',
@@ -23,7 +26,7 @@ export class DeepTagger implements INodeType {
 		credentials: [
 			{
 				name: 'deepTaggerApi',
-				required: false,
+				required: true,
 			},
 		],
 		properties: [
@@ -43,57 +46,13 @@ export class DeepTagger implements INodeType {
 				default: 'extractData',
 			},
 			{
-				displayName: 'Authentication Mode',
-				name: 'authMode',
-				type: 'options',
-				options: [
-					{
-						name: 'Credentials',
-						value: 'credentials',
-						description: 'Use saved credentials',
-					},
-					{
-						name: 'Direct',
-						value: 'direct',
-						description: 'Enter account ID directly (for testing)',
-					},
-				],
-				default: 'direct',
-				description: 'How to authenticate with DeepTagger API',
-			},
-			{
-				displayName: 'Account ID',
-				name: 'accountId',
+				displayName: 'Project ID',
+				name: 'projectId',
 				type: 'string',
 				default: '',
 				required: true,
-				displayOptions: {
-					show: {
-						authMode: ['direct'],
-					},
-				},
-				description: 'DeepTagger account ID',
-			},
-			{
-				displayName: 'Base URL',
-				name: 'baseUrl',
-				type: 'string',
-				default: 'http://host.docker.internal:5050',
-				required: true,
-				displayOptions: {
-					show: {
-						authMode: ['direct'],
-					},
-				},
-				description: 'DeepTagger API base URL',
-			},
-			{
-				displayName: 'Folder ID',
-				name: 'folderId',
-				type: 'string',
-				default: '',
-				required: true,
-				description: 'DeepTagger folder (project) ID',
+				description: 'DeepTagger project ID (e.g., fo_1759714105892)',
+				hint: 'Browse your projects at https://deeptagger.com/das/fos, then open a project to find its ID in the URL',
 			},
 			{
 				displayName: 'Input Type',
@@ -101,15 +60,15 @@ export class DeepTagger implements INodeType {
 				type: 'options',
 				options: [
 					{
-						name: 'Text',
-						value: 'text',
-					},
-					{
 						name: 'File',
 						value: 'file',
 					},
+					{
+						name: 'Text',
+						value: 'text',
+					},
 				],
-				default: 'text',
+				default: 'file',
 				description: 'Type of input to send',
 			},
 			{
@@ -150,22 +109,12 @@ export class DeepTagger implements INodeType {
 		for (let i = 0; i < items.length; i++) {
 			try {
 				const operation = this.getNodeParameter('operation', i) as string;
-				const authMode = this.getNodeParameter('authMode', i) as string;
-				const folderId = this.getNodeParameter('folderId', i) as string;
+				const projectId = this.getNodeParameter('projectId', i) as string;
 				const inputType = this.getNodeParameter('inputType', i) as string;
 
-				// Get auth details
-				let accountId: string;
-				let baseUrl: string;
-
-				if (authMode === 'credentials') {
-					const credentials = await this.getCredentials('deepTaggerApi');
-					accountId = credentials.accountId as string;
-					baseUrl = credentials.baseUrl as string;
-				} else {
-					accountId = this.getNodeParameter('accountId', i) as string;
-					baseUrl = this.getNodeParameter('baseUrl', i) as string;
-				}
+				// Get credentials
+				const credentials = await this.getCredentials('deepTaggerApi');
+				const baseUrl = credentials.baseUrl as string;
 
 				if (operation === 'extractData') {
 					let response;
@@ -173,43 +122,63 @@ export class DeepTagger implements INodeType {
 					if (inputType === 'text') {
 						const text = this.getNodeParameter('text', i) as string;
 
-						response = await this.helpers.request({
-							method: 'POST',
-							url: `${baseUrl}/v1/extract_data`,
-							headers: {
-								'x-consumer-username': accountId,
-								'Content-Type': 'application/x-www-form-urlencoded',
+						// Convert to form-urlencoded string
+						const formBody = `fo_id=${encodeURIComponent(projectId)}&text=${encodeURIComponent(text)}`;
+
+						// Use httpRequestWithAuthentication - credentials will add x-api-key header automatically
+						response = await this.helpers.httpRequestWithAuthentication.call(
+							this,
+							'deepTaggerApi',
+							{
+								method: 'POST',
+								url: `${baseUrl}/extract_data`,
+								headers: {
+									'Content-Type': 'application/x-www-form-urlencoded',
+								},
+								body: formBody,
 							},
-							form: {
-								fo_id: folderId,
-								text: text,
-							},
-							json: true,
-						});
+						);
 					} else {
 						// Handle file input
 						const binaryPropertyName = this.getNodeParameter('binaryProperty', i) as string;
 						const binaryData = this.helpers.assertBinaryData(i, binaryPropertyName);
 						const buffer = await this.helpers.getBinaryDataBuffer(i, binaryPropertyName);
 
-						response = await this.helpers.request({
-							method: 'POST',
-							url: `${baseUrl}/v1/extract_data`,
-							headers: {
-								'x-consumer-username': accountId,
-							},
-							formData: {
-								fo_id: folderId,
-								file: {
-									value: buffer,
-									options: {
-										filename: binaryData.fileName || 'document',
-										contentType: binaryData.mimeType,
-									},
+						// Manually construct multipart/form-data (no dependencies allowed for n8n Cloud)
+						const boundary = `----WebKitFormBoundary${Math.random().toString(36).substring(2)}`;
+						const parts: any[] = [];
+
+						// Add fo_id field
+						parts.push(Buffer.from(
+							`--${boundary}\r\n` +
+							`Content-Disposition: form-data; name="fo_id"\r\n\r\n` +
+							`${projectId}\r\n`
+						));
+
+						// Add file field
+						parts.push(Buffer.from(
+							`--${boundary}\r\n` +
+							`Content-Disposition: form-data; name="file"; filename="${binaryData.fileName || 'document'}"\r\n` +
+							`Content-Type: ${binaryData.mimeType || 'application/octet-stream'}\r\n\r\n`
+						));
+						parts.push(buffer);
+						parts.push(Buffer.from(`\r\n--${boundary}--\r\n`));
+
+						const body = Buffer.concat(parts);
+
+						// Use httpRequestWithAuthentication - credentials will add x-api-key header automatically
+						response = await this.helpers.httpRequestWithAuthentication.call(
+							this,
+							'deepTaggerApi',
+							{
+								method: 'POST',
+								url: `${baseUrl}/extract_data`,
+								headers: {
+									'Content-Type': `multipart/form-data; boundary=${boundary}`,
 								},
+								body: body,
 							},
-							json: true,
-						});
+						);
 					}
 
 					returnData.push({

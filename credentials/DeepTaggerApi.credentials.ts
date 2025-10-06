@@ -1,5 +1,6 @@
 import {
 	IAuthenticateGeneric,
+	ICredentialTestRequest,
 	ICredentialType,
 	INodeProperties,
 } from 'n8n-workflow';
@@ -7,23 +8,24 @@ import {
 export class DeepTaggerApi implements ICredentialType {
 	name = 'deepTaggerApi';
 	displayName = 'DeepTagger API';
-	documentationUrl = 'https://docs.deeptagger.com';
+	documentationUrl = 'https://deeptagger.com/docs';
 	properties: INodeProperties[] = [
 		{
-			displayName: 'Account ID',
-			name: 'accountId',
+			displayName: 'API Key',
+			name: 'apiKey',
 			type: 'string',
+			typeOptions: { password: true },
 			default: '',
 			required: true,
-			description: 'Your DeepTagger account ID',
+			description: 'Your DeepTagger API key',
 		},
 		{
 			displayName: 'Base URL',
 			name: 'baseUrl',
 			type: 'string',
-			default: 'http://host.docker.internal:5050',
+			default: 'https://deeptagger.com/api/v1',
 			required: true,
-			description: 'DeepTagger API base URL (use host.docker.internal for local development)',
+			description: 'DeepTagger API base URL',
 		},
 	];
 
@@ -31,8 +33,15 @@ export class DeepTaggerApi implements ICredentialType {
 		type: 'generic',
 		properties: {
 			headers: {
-				'x-consumer-username': '={{$credentials.accountId}}',
+				'x-api-key': '={{$credentials.apiKey}}',
 			},
+		},
+	};
+
+	test: ICredentialTestRequest = {
+		request: {
+			baseURL: '={{$credentials.baseUrl}}',
+			url: '/ping',
 		},
 	};
 }

@@ -1,7 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FF6B6B">
-  <path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 18H4V4h8v16zm8 0h-6V4h6v16z"/>
-  <rect x="6" y="7" width="4" height="2" fill="#fff"/>
-  <rect x="6" y="11" width="4" height="2" fill="#fff"/>
-  <rect x="14" y="7" width="4" height="2" fill="#fff"/>
-  <rect x="14" y="11" width="4" height="2" fill="#fff"/>
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="70 110 420 316"
+>
+  <!-- D (left stack of tags) -->
+  <rect x="80" y="120" width="190" height="56" rx="28" fill="#FFA24B" />
+  <rect x="80" y="200" width="260" height="56" rx="28" fill="#F5A2FF" />
+  <rect x="80" y="280" width="260" height="56" rx="28" fill="#A7A6FF" />
+  <rect x="80" y="360" width="190" height="56" rx="28" fill="#FF7A7A" />
+
+  <!-- T (right column of tags; top bar + stem) -->
+  <rect x="290" y="120" width="190" height="56" rx="28" fill="#FF7A7A" />
+  <rect x="360" y="200" width="120" height="56" rx="28" fill="#A7A6FF" />
+  <rect x="360" y="280" width="120" height="56" rx="28" fill="#A7A6FF" />
+  <rect x="360" y="360" width="120" height="56" rx="28" fill="#A7A6FF" />
 </svg>
