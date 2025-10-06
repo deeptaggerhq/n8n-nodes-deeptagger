@@ -99,6 +99,13 @@ export class DeepTagger implements INodeType {
 				required: true,
 				description: 'Name of the binary property containing the file',
 			},
+			{
+				displayName: 'Unwrap Response',
+				name: 'unwrapResponse',
+				type: 'boolean',
+				default: true,
+				description: 'Whether to return only the extracted data (unwrapped) or the full response including metadata',
+			},
 		],
 	};
 
@@ -111,6 +118,7 @@ export class DeepTagger implements INodeType {
 				const operation = this.getNodeParameter('operation', i) as string;
 				const projectId = this.getNodeParameter('projectId', i) as string;
 				const inputType = this.getNodeParameter('inputType', i) as string;
+				const unwrapResponse = this.getNodeParameter('unwrapResponse', i) as boolean;
 
 				// Get credentials
 				const credentials = await this.getCredentials('deepTaggerApi');
@@ -181,8 +189,14 @@ export class DeepTagger implements INodeType {
 						);
 					}
 
+					// Unwrap response if enabled (default behavior)
+					let jsonData = response;
+					if (unwrapResponse && response && typeof response === 'object' && 'data' in response) {
+						jsonData = response.data;
+					}
+
 					returnData.push({
-						json: response,
+						json: jsonData,
 						pairedItem: { item: i },
 					});
 				}
