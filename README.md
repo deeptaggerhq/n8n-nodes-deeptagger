@@ -1,6 +1,8 @@
-![DeepTagger Logo](https://raw.githubusercontent.com/deeptaggerhq/n8n-nodes-deeptagger/master/nodes/DeepTagger/deeptagger.svg)
-
-# n8n-nodes-deeptagger
+<div align="center">
+  <img src="https://raw.githubusercontent.com/deeptaggerhq/n8n-nodes-deeptagger/master/nodes/DeepTagger/deeptagger.svg" alt="DeepTagger Logo" width="200"/>
+  <h1>DeepTagger</h1>
+  <p><strong>n8n-nodes-deeptagger</strong></p>
+</div>
 
 This is an n8n community node that integrates [DeepTagger](https://deeptagger.com) into your n8n workflows. DeepTagger is an AI-powered document intelligence platform that automatically extracts structured data from documents like invoices, receipts, forms, and contracts.
 
