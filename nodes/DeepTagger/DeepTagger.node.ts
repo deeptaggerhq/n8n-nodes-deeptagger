@@ -103,7 +103,7 @@ export class DeepTagger implements INodeType {
 				displayName: 'Unwrap Response',
 				name: 'unwrapResponse',
 				type: 'boolean',
-				default: true,
+				default: false,
 				description: 'Whether to return only the extracted data (unwrapped) or the full response including metadata',
 			},
 		],

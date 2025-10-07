@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-deeptagger",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Extract structured data from documents using DeepTagger's AI-powered document intelligence API",
   "keywords": [
     "n8n-community-node-package",
