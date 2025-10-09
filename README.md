@@ -76,6 +76,9 @@ Extracts structured data from a document or text using a trained DeepTagger proj
   - **Text**: Send raw text for extraction
 - **Binary Property** (for File input): Name of the binary property containing the file (default: `data`)
 - **Text** (for Text input): The text content to extract data from
+- **Unwrap Response** (default: `true`): Whether to return only the extracted data or the full API response
+  - **Enabled (default)**: Returns only the extracted data from the `data` field - clean, ready-to-use structured data
+  - **Disabled**: Returns the complete API response including metadata like request ID, timestamp, etc.
 
 ## Usage
 
@@ -192,6 +195,11 @@ For issues related to:
 [MIT](LICENSE)
 
 ## Version History
+
+### 0.1.7 (2025-01-06)
+- Add Unwrap Response option to return clean extracted data by default
+- Improve README documentation with centered logo and examples
+- Add comprehensive troubleshooting section
 
 ### 0.1.0 (2025-01-06)
 - Initial release
